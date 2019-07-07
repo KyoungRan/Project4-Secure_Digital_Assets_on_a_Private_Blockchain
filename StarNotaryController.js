@@ -33,13 +33,9 @@ class StarNataryController {
           })
         } else {
           let result = await this.mempool.addRequestValidation(new RequestObject(walletAddress));
-          console.log('postRequestValidation result',  result);
+          // console.log('postRequestValidation result',  result);
           if(result) {
-            res.status(200).json({
-              "status": 200,
-              "message": "Success Response",
-              "json": result
-            })
+            res.status(200).json(result)
           } else {
             res.status(404).json({
               "status": 404,
@@ -71,12 +67,8 @@ class StarNataryController {
           
           this.mempool.findValidRequestByWalletAddress(walletAddress).then(validObj => {
             if(validObj) {
-              console.log('findrequestbywalletaddress memObj: ', validObj);
-              res.json({
-                "status": 200,
-                "message": "Success Response!",
-                "json": validObj
-              })
+              // console.log('findrequestbywalletaddress memObj: ', validObj);
+              res.status(200).json(validObj)
             } else {
               
               this.mempool.findRequestByWalletAddress(walletAddress).then(reqObj => {
@@ -90,11 +82,7 @@ class StarNataryController {
 
                   this.mempool.validateRequestByWallet(reqObj, signature).then(result => {
                     // if(result) {
-                      res.json({
-                        "status": 200,
-                        "message": "Success Response!",
-                        "json": result
-                      }) 
+                      res.status(200).json(result) 
                   })
                 }
               }) 

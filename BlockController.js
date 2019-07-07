@@ -53,11 +53,7 @@ class BlockController {
         } else {
           // res.setHeader("Content-Type", "application/json");
           block.body.star.storyDecoded = hex2ascii(block.body.star.story)
-          res.status(200).json({
-            "status": 200,
-            "message": "Success Response",
-            "json": block
-          });
+          res.status(200).json(block);
         }
       } catch(err) {
         throw new Error(err);
@@ -111,11 +107,7 @@ class BlockController {
 
                 block.body.star.storyDecoded = hex2ascii(block.body.star.story);
                 // block.body.star.storyDecoded = Buffer(block.body.star.story, 'hex').toString();
-                res.status(200).json({
-                  "status": 200,
-                  "message": "Success Response!",
-                  "json": block
-                })
+                res.status(200).json(block)
               }
             })
 
@@ -152,11 +144,7 @@ class BlockController {
           const block = await blockchain.getBlockByHash(req.params.hash);
           block.body.star.storyDecoded = hex2ascii(block.body.star.story);
           console.log('getBlockByHash block', block)
-          res.status(200).json({
-            "Status": 200,
-            "message": "Success Response",
-            "json": block
-          })
+          res.status(200).json(block)
         }
       } catch(err) {
         throw new Error(err);
@@ -181,11 +169,7 @@ class BlockController {
         } else {
           const block = await blockchain.getBlockByWalletAddress(req.params.address);
           // console.log('getBlockByWalletAddress block', block)
-          res.status(200).json({
-            "Status": 200,
-            "message": "Success Response",
-            "json": block
-          })
+          res.status(200).json(block)
         }
       } catch(err) {
         throw new Error(err);
