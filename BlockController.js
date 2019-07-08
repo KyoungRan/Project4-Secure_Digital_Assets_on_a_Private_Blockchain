@@ -86,22 +86,28 @@ class BlockController {
           })
         } else {
           let validRequest = await this.mempool.findValidRequestByWalletAddress(address);
-          let body = {
-            "address": address,
-            "star": {
-              ra: RA,
-              dec: DEC,
-              mag: MAG,
-              cen: CEN,
-              story: Buffer.from(star.story).toString('hex')
-            }
-          }
-          let block = new Block.Block(body);
-          if(validRequest) {
+          if(!validRequest) {
+            res.status(404).json({
+              "status": 404,
+              "message": "Valid request not found!"
+            })
+          } else {
+            let body = {
+              "address": address,
+              "star": {
+                ra: RA,
+                dec: DEC,
+                mag: MAG,
+                cen: CEN,
+                story: Buffer.from(star.story).toString('hex')
+              }
+            };
+            let block = new Block.Block(body);
+            
             await blockchain.addBlock(block).then(result => {
               if(result) {
                 this.mempool.removeValidRequest(address);
-                this.mempool.removeValidationRequest(address);
+                // this.mempool.removeValidationRequest(address);
     
                 const block = JSON.parse(result);
 
@@ -109,12 +115,6 @@ class BlockController {
                 // block.body.star.storyDecoded = Buffer(block.body.star.story, 'hex').toString();
                 res.status(200).json(block)
               }
-            })
-
-          } else {
-            res.status(404).json({
-              "status": 404,
-              "message": "Valid request not found!"
             })
           }
         }

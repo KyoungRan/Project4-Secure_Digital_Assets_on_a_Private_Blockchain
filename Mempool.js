@@ -16,9 +16,17 @@ class Mempool {
 
   async removeValidationRequest(walletAddress) {
     try {
-      // console.log('removeValidationRequest walletAddress: ', walletAddress)
-      delete this.mempool[walletAddress];
-      delete this.timeoutRequests[walletAddress];
+      if(this.timeoutRequests[walletAddress]) {
+        this.timeoutRequests[walletAddress] = null;
+      } 
+  
+      let index = 0;
+      this.mempool.forEach((mempoolObject) => {
+        if(mempoolObject.walletAddress === walletAddress) {
+          this.mempool.splice(index, 1);
+        }
+        index++;
+      })
     } catch(err) {
       throw new Error(err);
     }
@@ -26,8 +34,17 @@ class Mempool {
 
   async removeValidRequest(walletAddress) {
     try {
-      delete this.mempoolValid[walletAddress];
-      delete this.timeoutMempoolValid[walletAddress];
+      if(this.timeoutMempoolValid[walletAddress]) {
+        this.timeoutMempoolValid[walletAddress] = null;
+      }
+
+      let index = 0;
+      this.mempoolValid.forEach((mempoolValidObject) => {
+        if(mempoolValidObject.status.address === walletAddress) {
+          this.mempoolValid.splice(index, 1);
+        }
+        index++;
+      })
     } catch(err) {
       throw new Error(err);
     }
@@ -38,11 +55,12 @@ class Mempool {
     return new Promise((resolve, reject) => {
       // Find mempoolObject in leveldb            
       this.mempool.forEach((mempoolObject) => {
-        if(mempoolObject.walletAddress === walletAddress){
+        if(mempoolObject.walletAddress === walletAddress) {
           let timeElapse = (new Date().getTime().toString().slice(0,-3)) - mempoolObject.requestTimeStamp;
           let timeLeft = (TimeoutRequestsWindowTime/1000) - timeElapse;
-          mempoolObject.validationWindow = timeLeft;        
-            resolve(mempoolObject);
+          mempoolObject.validationWindow = timeLeft;
+
+          resolve(mempoolObject);
         }
       });
       resolve(null);
@@ -53,8 +71,9 @@ class Mempool {
     try {
       // console.log(this.mempoolValid.length);
       return new Promise((resolve, reject) => {
-        // Find mempoolValidObject in leveldb            
+        // Find mempoolValidObject in leveldb
         this.mempoolValid.forEach((mempoolValidObject) => {
+          // console.log('mempoolValidObject.status.validationWindow', mempoolValidObject.status.validationWindow);
           if(mempoolValidObject.status.address === walletAddress){
             let timeElapse = (new Date().getTime().toString().slice(0,-3)) - mempoolValidObject.status.requestTimeStamp;
             let timeLeft = (TimeoutMempoolValidWindowTime/1000) - timeElapse;
@@ -70,21 +89,21 @@ class Mempool {
   }
 
   // Add requestValidation 
-  async addRequestValidation(RequestObject) {
+  async addRequestValidation(walletAddress) {
     try {
-      this.mempool.push(RequestObject);
-      let result = await this.findRequestByWalletAddress(RequestObject.walletAddress);
-      
-      if(result) {
-        return result;
-      } else {
-        this.mempool[RequestObject.walletAddress] = RequestObject;
-        this.timeoutRequests[RequestObject.walletAddress] = setTimeout(function() {
-          this.removeValidationRequest(RequestObject.walletAddress)
+
+      return new Promise((resolve, reject) => {
+        let requestObject = new RequestObject(walletAddress);
+
+        this.mempool.push(requestObject);
+
+        this.timeoutRequests[walletAddress] = setTimeout(() => {
+          this.removeValidationRequest(walletAddress)
         }, TimeoutRequestsWindowTime);
 
-        return RequestObject;
-      }
+        resolve(requestObject);
+      });
+  
     } catch(err) {
       throw new Error(err);
     }

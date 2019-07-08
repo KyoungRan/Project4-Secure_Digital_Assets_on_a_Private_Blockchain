@@ -32,16 +32,26 @@ class StarNataryController {
             "message": "Please write the address!!"
           })
         } else {
-          let result = await this.mempool.addRequestValidation(new RequestObject(walletAddress));
-          // console.log('postRequestValidation result',  result);
-          if(result) {
-            res.status(200).json(result)
-          } else {
-            res.status(404).json({
-              "status": 404,
-              "message": "it is wrong!"
-            })
-          }
+          this.mempool.findRequestByWalletAddress(walletAddress).then(result => {
+            if(result) {
+              res.status(200).json(result);
+            } else {
+              this.mempool.addRequestValidation(walletAddress).then(result => {
+                res.status(200).json(result);
+              });
+            }
+
+          })
+          // let result = await this.mempool.addRequestValidation(new RequestObject(walletAddress));
+          // // console.log('postRequestValidation result',  result);
+          // if(result) {
+          //   res.status(200).json(result)
+          // } else {
+          //   res.status(404).json({
+          //     "status": 404,
+          //     "message": "it is wrong!"
+          //   })
+          // }
         }
       } catch(err) {
         throw new Error(err);;
